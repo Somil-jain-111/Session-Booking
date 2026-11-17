@@ -1,0 +1,256 @@
+{
+  "info": {
+    "name": "Session Booking API",
+    "description": "Run npm run seed and set teacherId before running requests in order. Dates use UTC; timestamps are milliseconds.",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    {
+      "key": "baseUrl",
+      "value": "http://localhost:3000"
+    },
+    {
+      "key": "teacherId",
+      "value": ""
+    },
+    {
+      "key": "userId",
+      "value": ""
+    },
+    {
+      "key": "sessionId",
+      "value": ""
+    }
+  ],
+  "item": [
+    {
+      "name": "1. Create user",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/users",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"fullName\": \"Somil Jain\",\n  \"email\": \"somil.{{$guid}}@example.com\",\n  \"phone\": \"9876543210\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"userId\", pm.response.json().data._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "2. Create session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/sessions",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"teacherId\": \"{{teacherId}}\",\n  \"startTime\": \"2030-05-10T10:00:00Z\",\n  \"endTime\": \"2030-05-10T11:00:00Z\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 201\", () => pm.response.to.have.status(201));",
+              "if (pm.response.code === 201) pm.collectionVariables.set(\"sessionId\", pm.response.json().data._id);"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "3. Available sessions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/sessions/available?dateTimestamp=1904637600000"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "4. Book session",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/book",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "5. Upcoming sessions",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{userId}}/sessions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "6. Complete session",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/complete"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "7. Completed history",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": "{{baseUrl}}/users/{{userId}}/sessions"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 200\", () => pm.response.to.have.status(200));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "8. Reject duplicate booking",
+      "request": {
+        "method": "POST",
+        "header": [
+          {
+            "key": "Content-Type",
+            "value": "application/json"
+          }
+        ],
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/book",
+        "body": {
+          "mode": "raw",
+          "raw": "{\n  \"userId\": \"{{userId}}\"\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        }
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    },
+    {
+      "name": "9. Reject repeated completion",
+      "request": {
+        "method": "PATCH",
+        "header": [],
+        "url": "{{baseUrl}}/sessions/{{sessionId}}/complete"
+      },
+      "event": [
+        {
+          "listen": "test",
+          "script": {
+            "type": "text/javascript",
+            "exec": [
+              "pm.test(\"Status is 409\", () => pm.response.to.have.status(409));"
+            ]
+          }
+        }
+      ]
+    }
+  ]
+}
